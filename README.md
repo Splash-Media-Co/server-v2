@@ -1,5 +1,5 @@
 ![serverv2](https://u.cubeupload.com/zzbooplister/Group11.png)
-### <p align="center">Second generation of the Splash server! Completely remade from scratch!</p>
+![serverv22](https://u.cubeupload.com/zzbooplister/TheSplashservers2ndg.png)
 
 ## How to install
 - Clone the repo
