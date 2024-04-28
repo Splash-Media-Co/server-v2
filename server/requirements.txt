@@ -1,5 +1,4 @@
 Cerberus
-cloudlink==0.2.0.1
 snowflake-id==1.0.2
 orjson
 websockets==12.0
