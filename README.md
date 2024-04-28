@@ -1,4 +1,4 @@
-# <p align="center">**Server v2**</p>
+![serverv2](https://u.cubeupload.com/zzbooplister/Group11.png)
 ### <p align="center">Second generation of the Splash server! Completely remade from scratch!</p>
 
 ## How to install
