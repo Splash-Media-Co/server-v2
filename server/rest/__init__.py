@@ -1,11 +1,9 @@
 from quart import Quart, request
-from prisma import Prisma
 from .home import home
 from .users import users
 from security import return_blocked_ips, is_blocked
 import orjson
-
-db = Prisma()
+from database import db
 
 app = Quart(__name__)
 

@@ -1,12 +1,13 @@
 import requests as r
 import orjson
 from pydantic import BaseModel
-from prisma.models import Post
+from prisma.models import Post, User
 from cloudlink import CloudlinkServer
 from quart import current_app as app, Request
 from uuid import uuid4
 from time import time
 import security
+from database import db
 
 """Your little companion that does what it says."""
 
@@ -89,7 +90,7 @@ class Helper:
     async def create_post(
         self, username: str, content: str, origin: str, request: Request
     ) -> dict:
-        # return 400 if the post is 4000 characters longer or is just whitespaces
+        # badRequest if the post is 4000 characters or longer, is less than 1 character long, or is just whitespaces
         if len(content) > 4000 or content.isspace() or len(content) < 1:
             return 400
         post = Post(
@@ -103,13 +104,13 @@ class Helper:
             request.permissions, security.Permissions.BYPASS_PROFANITY
         ):
             return 424
-        db_result = app.db.post.create(
+        db_result = db.post.create(
             data=post.model_dump(exclude_unset=True)
         ).model_dump()
         if origin == "home":
             self.cl.broadcast({"type": "post_home", "val": db_result}, direct_wrap=True)
         else:
-            chat = app.db.chat.find_unique(
+            chat = db.chat.find_unique(
                 where={"chatuuid": origin}, include={"members": True}
             )
             if chat:
@@ -131,7 +132,7 @@ class Helper:
         return db_result
 
     async def get_user(self, username: str) -> dict:
-        to_return = app.db.user.find_first(where={"username": username})
+        to_return = db.user.find_first(where={"username": username})
         print(to_return)
         if to_return:
             to_return = to_return.model_dump()
@@ -143,7 +144,7 @@ class Helper:
         return to_return
 
     async def get_users(self, page: int) -> list:
-        users = app.db.user.find_many(skip=page * 25, take=25)
+        users = db.user.find_many(skip=page * 25, take=25)
         print(users)
         if users:
             # remove all entries that have a key in security.SensitiveFields
@@ -153,3 +154,15 @@ class Helper:
         else:
             return 404
         return users
+    async def create_user(self, username: str, password: str) -> dict:
+        user = User(
+            username=username,
+            uuid=uuid(),
+            creation_date=round(time()),
+            password=security.hash_password(password),
+            pfp="default",
+            token="none",
+            permissions=0,
+            banned=False
+        ).model_dump(exclude_unset=True)
+        return db.user.create(data=user).model_dump()

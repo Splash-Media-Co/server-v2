@@ -7,3 +7,6 @@ requests
 pydantic
 quart
 prisma
+redis
+uvicorn
+bcrypt

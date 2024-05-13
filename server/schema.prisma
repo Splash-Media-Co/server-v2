@@ -35,13 +35,14 @@ model User {
   creation_date BigInt
   last_seen BigInt? @default(0)
   password String
-  token String
+  tokens String?
   quote String?
   pfp String
   permissions BigInt? @default(0)
   banned Boolean? @default(false)
-  extra_flags String?
+  extra_flags BigInt?
   chats ChatMember[]
+  delete Int?
 }
 
 model Relation {
