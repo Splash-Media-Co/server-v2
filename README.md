@@ -1,6 +1,5 @@
-# <p align="center">**Server v2**</p>
-### <p align="center">Second generation of the Splash server! Completely remade from scratch!</p>
-
+![serverv2](https://u.cubeupload.com/zzbooplister/Group11.png)
+## <p align="center">![serverv22](https://u.cubeupload.com/zzbooplister/thi.png)</p>
 ## How to install
 - Clone the repo
 - Do ``./start.sh`` (you may need to do ``chmod +x start.sh`` first)
