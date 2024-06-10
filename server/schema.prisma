@@ -7,85 +7,104 @@ datasource db {
 // generator
 generator client {
   provider             = "prisma-client-py"
-  interface = "sync"
+  interface            = "sync"
   recursive_type_depth = 5
 }
 
 // data models
 model Post {
-  id        String     @id
-  content   String
-  creation_date Int
+  id              String         @id
+  content         String
+  creation_date   Int
   author_username String
-  deleted Boolean? @default(false)
-  origin String
-  post_revisions PostRevision[]
+  deleted         Boolean?       @default(false)
+  origin          String
+  post_revisions  PostRevision[]
 }
 
 model PostRevision {
-  id BigInt @id
-  post Post @relation(fields: [postId], references: [id])
+  id     BigInt  @id @default(autoincrement())
+  post   Post    @relation(fields: [postId], references: [id])
   postId String
-  edit String?
+  edit   String?
 }
 
 model User {
-  username String
-  uuid String @id
-  creation_date BigInt
-  last_seen BigInt? @default(0)
-  password String
-  tokens String?
-  quote String?
-  pfp String
-  permissions BigInt? @default(0)
-  banned Boolean? @default(false)
-  extra_flags BigInt?
-  chats ChatMember[]
-  delete Int?
+  username       String
+  uuid           String        @id
+  creation_date  BigInt
+  last_seen      BigInt?       @default(0)
+  password       String
+  tokens         Token[]
+  quote          String?
+  pfp            String
+  permissions    BigInt?       @default(0)
+  banned         Boolean?      @default(false)
+  extra_flags    BigInt?
+  chats          ChatMember[]
+  delete         Int?
+  restrictionsTo Restriction[] @relation("RestrictionToUser")
+  restrictionsBy Restriction[] @relation("RestrictionByUser")
 }
 
 model Relation {
-  id BigInt @id @default(autoincrement())
-  from_user String
-  to_user String
-  state Int
+  id         BigInt @id @default(autoincrement())
+  from_user  String
+  to_user    String
+  state      Int
   updated_at BigInt
 }
 
 model AuditLog {
-  id BigInt @id @default(autoincrement())
-  by String
-  action String
-  to String?
+  id      BigInt  @id @default(autoincrement())
+  by      String
+  action  String
+  to      String?
   details String?
 }
 
 model Chat {
-  chatuuid String @id
-  name String
-  author String
-  members ChatMember[]
+  chatuuid String       @id
+  name     String
+  author   String
+  members  ChatMember[]
 }
 
 model ChatMember {
-  id BigInt @id @default(autoincrement())
-  chat Chat @relation(fields: [chatId], references: [chatuuid])
+  id     BigInt @id @default(autoincrement())
+  chat   Chat   @relation(fields: [chatId], references: [chatuuid])
   chatId String
-  user User @relation(fields: [userId], references: [uuid])
+  user   User   @relation(fields: [userId], references: [uuid])
   userId String
 }
 
 model Report {
-  id BigInt @id @default(autoincrement())
+  id        BigInt  @id @default(autoincrement())
   from_user String
-  to_user String
-  reason String
-  details String?
+  to_user   String
+  reason    String
+  details   String?
 }
 
 model NetBlock {
-  id Int @id @default(autoincrement())
+  id    Int    @id @default(autoincrement())
   to_ip String
-  type Int
+  type  Int
+}
+
+model Restriction {
+  id           Int     @id @default(autoincrement())
+  to_user      User    @relation(name: "RestrictionToUser", fields: [userUuid], references: [uuid])
+  restrictions BigInt
+  userUuid     String
+  reason       String
+  expires      BigInt
+  by           User?   @relation(name: "RestrictionByUser", fields: [byUserUuid], references: [uuid])
+  byUserUuid   String?
+}
+
+model Token {
+  token    String  @id
+  User     User?   @relation(fields: [userUuid], references: [uuid])
+  userUuid String?
 }

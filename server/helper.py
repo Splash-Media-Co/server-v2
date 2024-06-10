@@ -2,12 +2,13 @@ import requests as r
 import orjson
 from pydantic import BaseModel
 from prisma.models import Post, User
-from cloudlink import CloudlinkServer
+from oceanlink import OceanLinkServer
 from quart import current_app as app, Request
 from uuid import uuid4
 from time import time
 import security
 from database import db
+import splashclasses
 
 """Your little companion that does what it says."""
 
@@ -83,8 +84,8 @@ class Profanity:
 
 # Classes!
 class Helper:
-    def __init__(self, cl: CloudlinkServer):
-        self.cl = cl
+    def __init__(self, ol: OceanLinkServer):
+        self.ol = ol
         self.profanity = Profanity("https://vector.profanity.dev")
 
     async def create_post(
@@ -101,24 +102,24 @@ class Helper:
             origin=origin,
         )
         if self.profanity.detect(content) and not security.has_permission(
-            request.permissions, security.Permissions.BYPASS_PROFANITY
+            request.permissions, splashclasses.Permissions.BYPASS_PROFANITY
         ):
             return 424
         db_result = db.post.create(
             data=post.model_dump(exclude_unset=True)
         ).model_dump()
         if origin == "home":
-            self.cl.broadcast({"type": "post_home", "val": db_result}, direct_wrap=True)
+            self.ol.broadcast({"mode": "post:home", "value": db_result})
         else:
             chat = db.chat.find_unique(
                 where={"chatuuid": origin}, include={"members": True}
             )
             if chat:
                 chat_members = [m.userId for m in chat.members]
-                self.cl.broadcast(
+                self.ol.broadcast(
                     {
-                        "cmd": "post_chat",
-                        "val": {
+                        "mode": "post:chat",
+                        "value": {
                             "username": username,
                             "chat_name": chat.name,
                             "chat_id": origin,
@@ -126,14 +127,14 @@ class Helper:
                         },
                     },
                     usernames=list(
-                        set(app.cl.get_ulist().split(";")) & set(chat_members)
+                        set(app.ol.get_userlist()) & set(chat_members)
                     ),
                 )
         return db_result
 
     async def get_user(self, username: str) -> dict:
         to_return = db.user.find_first(where={"username": username})
-        print(to_return)
+
         if to_return:
             to_return = to_return.model_dump()
             # remove all entries that have a key in security.SensitiveFields
@@ -145,15 +146,16 @@ class Helper:
 
     async def get_users(self, page: int) -> list:
         users = db.user.find_many(skip=page * 25, take=25)
-        print(users)
         if users:
+            users = [user.model_dump() for user in users]
             # remove all entries that have a key in security.SensitiveFields
             for user in users:
                 for k in security.SensitiveFields:
                     user.pop(k, None)
         else:
-            return 404
+            return 416
         return users
+
     async def create_user(self, username: str, password: str) -> dict:
         user = User(
             username=username,
@@ -166,3 +168,9 @@ class Helper:
             banned=False
         ).model_dump(exclude_unset=True)
         return db.user.create(data=user).model_dump()
+    
+    async def get_user_data(self, token):
+        return db.user.find_first(
+            where={"tokens": {"some": {"token": token}}},
+            include={"restrictionsBy": True}
+        )

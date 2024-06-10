@@ -4,29 +4,26 @@ import asyncio
 import os
 from helper import Helper
 from rest import app as rest_api
-from cloudlink import CloudlinkServer
-from clcommands import SplashCommands
 from security import background_tasks
 from database import db
 from dotenv import load_dotenv
+from oceanlink import OceanLinkServer
+from splashclasses import SplashCommands
+
 
 load_dotenv()
 
-# Inicialize CloudLink server
-cl = CloudlinkServer()
-cl.remove_command("setid")
-cl.remove_command("gmsg")
-cl.remove_command("gvar")
-cl.set_motd("Splash Media Server")
-cl.set_real_ip_header(os.getenv("REAL_IP_HEADER"))
+# Inicialize OceanLink server
+ol = OceanLinkServer()
+ol.set_message("Splash Media Server")
+ol.set_true_ip_header(os.getenv("REAL_IP_HEADER"))
 
-helper = Helper(cl)
+helper = Helper(ol)
 
 # Start commands
+SplashCommands(ol, helper)
 
-SplashCommands(cl, helper)
-
-rest_api.cl = cl
+rest_api.ol = ol
 rest_api.helper = helper
 
 Thread(target=background_tasks, daemon=True).start()
@@ -41,7 +38,7 @@ async def main():
     }, daemon=True).start()
 
     # Start Cloudlink server
-    await rest_api.cl.run(host=os.getenv("CL_HOST", "0.0.0.0"), port=int(os.getenv("CL_PORT", 3000)))
+    await rest_api.ol.run(host=os.getenv("CL_HOST", "0.0.0.0"), port=int(os.getenv("CL_PORT", 3000)))
 
 if __name__ == "__main__":
     asyncio.run(main())
