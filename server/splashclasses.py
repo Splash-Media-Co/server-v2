@@ -48,17 +48,13 @@ class SplashCommands:
         self.server.set_auth_command_function(self.auth)
     
     async def auth(self, client: OceanLinkClient, packet: OceanLinkAuthPkt):
-        print(str(client.username))
-        print(client.username is not None)
         if client.username is not None:
             return await client.send_statuscode("success", packet["listen_to"])
         user: User = db.user.find_first(
             where={"tokens": {"some": {"token": packet["token"]}}},
             include={"restrictionsBy": True}
         )
-        print(user)
         if user:
-            print(user.username)
             client.set_username(user.username)
             user = user.model_dump()
             for key in ["password", "extra_flags", "restrictionsTo"]:
