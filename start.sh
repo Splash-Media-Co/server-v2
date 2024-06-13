@@ -1,7 +1,4 @@
-cd server
-pip install -r requirements.txt
-prisma db push
-python main.py# Check if Redis Server is installed, if not, install it
+# Check if Redis Server is installed, if not, install it
 if ! command -v redis-server &> /dev/null
 then
     echo "Redis Server could not be found, installing..."
@@ -19,16 +16,16 @@ then
     sudo apt-get install redis -y
 fi
 
-# Start Redis Server
-redis-server
+# Start Redis Server in the background
+nohup redis-server \&
 
 # Navigate to the server directory
 cd server
 
-# Install Python dependencies
-pip install -r requirements.txt
+# Install deps
+pip install -r requirements.txt --quiet
 
-# Apply Prisma schema changes to the database
+# Push Prisma
 prisma db push
 
 # Run the main Python script
