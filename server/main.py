@@ -37,8 +37,8 @@ async def main():
         "root_path": os.getenv("API_ROOT", ""),
     }, daemon=True).start()
 
-    # Start Cloudlink server
-    await rest_api.ol.run(host=os.getenv("CL_HOST", "0.0.0.0"), port=int(os.getenv("CL_PORT", 3000)))
+    # Start Oceanlink server
+    await rest_api.ol.run(host=os.getenv("OL_HOST", "0.0.0.0"), port=int(os.getenv("OL_PORT", 3000)))
 
 if __name__ == "__main__":
     asyncio.run(main())
