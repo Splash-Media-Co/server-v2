@@ -53,7 +53,6 @@ class OceanLinkServer:
         self.true_ip_header = Optional[str]
     
     async def handle_client(self, websocket: websockets.WebSocketServerProtocol):
-        print("client joined, handling thingies")
         client = OceanLinkClient(self, websocket)
 
         # Add websocket connection to websocket list

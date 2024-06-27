@@ -57,11 +57,8 @@ def background_tasks() -> None:
     """
     Runs background tasks.
     """
-    while True:
-        time.sleep(1800)  # sleep for 30 minutes
-        print("✨ Running background tasks...")
-        # print(db.user.find_many(take=25))
-        print("✅ Finished background tasks!")
+    # No background tasks at the moment...
+    pass
 
 
 def is_ratelimited(bucket_id: str):
