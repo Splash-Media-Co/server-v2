@@ -1,15 +1,13 @@
-FROM python:3.12
+FROM python:3.9-slim
 
-WORKDIR /
-app
+WORKDIR /app
 
-COPY requirements.txt .
+COPY server/ .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
-
-EXPOSE 3000
 EXPOSE 3001
+EXPOSE 3000
 
-CMD ["python", "server/main.py"]
+# Run the application
+CMD ["python", "main.py"]
